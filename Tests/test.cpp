@@ -4,8 +4,10 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <ntdef.h>
 #include "Dynamic_array.h"
 #include "Heap.h"
+#include "Binomial_heap.h"
 
 using testing::Eq;
 
@@ -95,7 +97,6 @@ TEST(Heap_tests, insert_test) {
     a.insert(-1);
     EXPECT_EQ(-1, a.get_min());
 }
-
 TEST(Heap_tests, extract_test) {
     Heap<int> a;
     a.insert(2);
@@ -129,7 +130,6 @@ TEST(Heap_tests, extract_test) {
     a.insert(-1);
     EXPECT_EQ(-1, a.get_min());
 }
-
 TEST(Heap_tests, extract_test_3kheap) {
     Heap<int> a(3);
     a.insert(2);
@@ -152,6 +152,151 @@ TEST(Heap_tests, extract_test_3kheap) {
     a.extract_min();
     EXPECT_EQ(2, a.get_min());
     a.extract_min();
+    a.insert(2);
+    a.insert(2);
+    a.extract_min();
+    EXPECT_EQ(2, a.get_min());
+    a.insert(1);
+    EXPECT_EQ(1, a.get_min());
+    a.insert(4);
+    EXPECT_EQ(1, a.get_min());
+    a.insert(5);
+    EXPECT_EQ(1, a.get_min());
+    a.insert(-1);
+    EXPECT_EQ(-1, a.get_min());
+}
+
+TEST(Heap_pointers_tests, validation_test) {
+    Heap<int> a;
+    Heap<int>::Pointer* pointer = a.insert(5);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.insert(-1);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.insert(2);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.insert(-3);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.insert(-5);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.insert(6);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.extract_min();
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.extract_min();
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.extract_min();
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.extract_min();
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.extract_min();
+    EXPECT_EQ(6, a.get_min());
+}
+TEST(Heap_pointers_tests, change_test) {
+    Heap<int> a;
+    Heap<int>::Pointer* pointer1 = a.insert(8);
+    EXPECT_EQ(8, a.get_element(pointer1));
+    a.insert(-1);
+    Heap<int>::Pointer* pointer2 = a.insert(-2);
+    a.insert(7);
+    EXPECT_EQ(8, a.get_element(pointer1));
+    EXPECT_EQ(-2, a.get_element(pointer2));
+    a.insert(-3);
+    a.insert(4);
+    a.insert(3);
+    EXPECT_EQ(8, a.get_element(pointer1));
+    EXPECT_EQ(-2, a.get_element(pointer2));
+    EXPECT_EQ(-3, a.get_min());
+    a.change(pointer1, -8);
+    EXPECT_EQ(-8, a.get_element(pointer1));
+    EXPECT_EQ(-2, a.get_element(pointer2));
+    EXPECT_EQ(-8, a.get_min());
+    a.change(pointer1, 100);
+    EXPECT_EQ(100, a.get_element(pointer1));
+    EXPECT_EQ(-2, a.get_element(pointer2));
+    EXPECT_EQ(-3, a.get_min());
+    a.change(pointer2, -4);
+    EXPECT_EQ(100, a.get_element(pointer1));
+    EXPECT_EQ(-4, a.get_element(pointer2));
+    EXPECT_EQ(-4, a.get_min());
+}
+TEST(Heap_pointers_tests, delete_element_test) {
+    Heap<int> a;
+    Heap<int>::Pointer* pointer1 = a.insert(8);
+    EXPECT_EQ(8, a.get_element(pointer1));
+    a.insert(-1);
+    Heap<int>::Pointer* pointer2 = a.insert(-2);
+    a.insert(7);
+    EXPECT_EQ(8, a.get_element(pointer1));
+    EXPECT_EQ(-2, a.get_element(pointer2));
+    a.insert(-3);
+    a.insert(4);
+    a.insert(3);
+    EXPECT_EQ(-3, a.get_min());
+    a.delete_element(pointer2);
+    EXPECT_EQ(-3, a.get_min());
+    a.extract_min();
+    EXPECT_EQ(-1, a.get_min());
+}
+
+TEST(Binomial_heap_tests, insert_test) {
+    Binomial_heap<int> kek;
+    int minim;
+    kek.insert(0);
+    minim = 0;
+    for(int i = 0; i <  100000; i++) {
+        EXPECT_EQ(kek.get_min(), minim);
+        int t = rand();
+        kek.insert(t);
+        minim = std::min(t, minim);
+    }
+   // kek.print_node(kek.get_root());
+   // a.print(a.get_root());
+    /*a.insert(-1);
+    a.insert(-2);
+    a.insert(-3);*/
+    //a.print(a.get_root());
+}
+TEST(Binomial_heap_tests, extract_test) {
+    Binomial_heap<int> a;
+    a.insert(5);
+    a.insert(7);
+    a.insert(9);
+    a.insert(-2);
+    a.insert(-5);
+    a.insert(100);
+    EXPECT_EQ(a.get_min(), -5);
+    a.extract_min();
+    EXPECT_EQ(a.get_min(), -2);
+    a.extract_min();
+    EXPECT_EQ(a.get_min(), 5);
+    a.extract_min();
+    EXPECT_EQ(a.get_min(), 7);
+    a.extract_min();
+    EXPECT_EQ(a.get_min(), 9);
+    a.extract_min();
+    EXPECT_EQ(a.get_min(), 100);
+    a.extract_min();
+    EXPECT_THROW(a.get_min(), std::out_of_range);
+    EXPECT_THROW(a.extract_min(), std::out_of_range);
+
+    a.insert(2);
+    a.insert(1);
+    a.insert(4);
+    a.insert(5);
+    a.insert(-1);
+    int tmp = a.extract_min();
+    EXPECT_EQ(tmp, -1);
+    EXPECT_EQ(1, a.get_min());
+    tmp = a.extract_min();
+    EXPECT_EQ(tmp, 1);
+    EXPECT_EQ(2, a.get_min());
+    a.extract_min();
+    EXPECT_EQ(4, a.get_min());
+    a.extract_min();
+    EXPECT_EQ(5, a.get_min());
+    a.extract_min();
+    EXPECT_THROW(a.extract_min(), std::out_of_range);
+    EXPECT_THROW(a.get_min(), std::out_of_range);
     a.insert(2);
     a.insert(2);
     a.extract_min();
