@@ -15,10 +15,12 @@ public:
     class Pointer;
 
     struct Heap_node {
-        T key;
+        T key = nullptr;
         int degree = 0;
         Heap_node* child = nullptr;
         Heap_node* sibling = nullptr;
+        Heap_node* prev = nullptr;
+        Heap_node* parent = nullptr;
         Pointer* pointer;
         Heap_node(T key_): key(key_), degree(1) {};
         Heap_node() {};
@@ -29,6 +31,11 @@ public:
         T get_elem() {
             return elem->key;
         }
+
+        Heap_node* get_node() {
+            return elem;
+        }
+
         void set_index(Heap_node* x) {
             elem = x;
             return;
@@ -84,18 +91,209 @@ public:
         merge(nw);
         return p;
     }
+    Heap_node* sift_up(Heap_node* node) {
+        if(node == nullptr) {
+            return nullptr;
+        }
+        while(node->parent != nullptr) {
+            Heap_node* p = node->parent;
+            Heap_node* tmp;
+            if(p->child == node) {
+                tmp = node->child;
+                node->child = p;
+                p->child = tmp;
+                if(tmp != nullptr) {
+                    tmp->parent = p;
+                }
+            } else {
+                tmp = p->child;
+                p->child = node->child;
+                node->child = tmp;
+                if(tmp != nullptr) {
+                    tmp->parent = node;
+                }
+            }
+            tmp = p->sibling;
+            p->sibling = node->sibling;
+            if(node->sibling != nullptr) {
+                node->sibling->prev = p;
+            }
+            node->sibling = tmp;
+            if(tmp != nullptr) {
+                tmp->prev = node;
+            }
+            tmp = p->prev;
+            p->prev = node->prev;
+            if(node->prev != nullptr) {
+                node->prev->sibling = p;
+            }
+            node->prev = tmp;
+            if(tmp != nullptr) {
+                tmp->sibling = node;
+            }
+            std::swap(p->degree, node->degree);
+            if(p->parent != nullptr && p->parent->child == p) {
+                p->parent->child = node;
+            }
+            tmp = p->parent;
+            p->parent = node;
+            node->parent = tmp;
+            if(root == p) {
+                root = node;
+            }
+        }
+        return node;
+    }
 
+    Heap_node* sift_up_with_compare(Heap_node* node) {
+        if(node == nullptr) {
+            return nullptr;
+        }
+        while(node->parent != nullptr && node->parent->key > node->key) {
+            Heap_node* p = node->parent;
+            Heap_node* tmp;
+            if(p->child == node) {
+                tmp = node->child;
+                node->child = p;
+                p->child = tmp;
+            } else {
+                tmp = p->child;
+                p->child = node->child;
+                node->child = tmp;
+            }
+            tmp = p->sibling;
+            p->sibling = node->sibling;
+            if(node->sibling != nullptr) {
+                node->sibling->prev = p;
+            }
+            node->sibling = tmp;
+            if(tmp != nullptr) {
+                tmp->prev = node;
+            }
+            tmp = p->prev;
+            p->prev = node->prev;
+            if(node->prev != nullptr) {
+                node->prev->sibling = p;
+            }
+            node->prev = tmp;
+            if(tmp != nullptr) {
+                tmp->sibling = node;
+            }
+            std::swap(p->degree, node->degree);
+            if(p->parent != nullptr && p->parent->child == p) {
+                p->parent->child = node;
+            }
+            tmp = p->parent;
+            p->parent = node;
+            node->parent = tmp;
+            if(root == p) {
+                root = node;
+            }
+        }
+        return node;
+    }
+
+    void change_node(Pointer* p, T key) {
+        if(p == nullptr) {
+            throw std::logic_error("Invalid pointer");
+        }
+        Heap_node* node = p->get_node();
+        node->key = key;
+        if(node->parent != nullptr && node->parent->key > node->key) {
+            sift_up_with_compare(node);
+            update_min(root);
+        } else {
+            Heap_node* extract = sift_up(node);
+            Heap_node* chld = extract->child;
+            Heap_node* change = root;
+            if(root == extract) {
+                root = root->sibling;
+                if(root != nullptr) {
+                    root->prev = nullptr;
+                }
+            }
+            while(change->sibling != nullptr) {
+                if(change->sibling == extract) {
+                    change->sibling = extract->sibling;
+                    if(extract->sibling != nullptr) {
+                        extract->sibling->prev = change;
+                    }
+                    break;
+                }
+                change = change->sibling;
+            }
+            Heap_node* tmp = chld;
+            while(tmp != nullptr) {
+                tmp->parent = nullptr;
+                tmp = tmp->sibling;
+            }
+            chld = reverse_list(chld);
+            print(chld);
+            merge(chld);
+            extract->child = nullptr;
+            extract->sibling = nullptr;
+            extract->prev = nullptr;
+            extract->degree = 1;
+            print(extract);
+            merge(extract);
+        }
+    }
+
+    void delete_node(Pointer* node) {
+        if(node == nullptr) {
+            throw std::logic_error("Invalid pointer");
+        }
+        Heap_node* extract = sift_up(node->get_node());
+        Heap_node* chld = extract->child;
+        Heap_node* change = root;
+        if(root == extract) {
+            root = root->sibling;
+            if(root != nullptr) {
+                root->prev = nullptr;
+            }
+        }
+        while(change->sibling != nullptr) {
+            if(change->sibling == extract) {
+                change->sibling = extract->sibling;
+                if(extract->sibling != nullptr) {
+                    extract->sibling->prev = change;
+                }
+                break;
+            }
+            change = change->sibling;
+        }
+        delete extract;
+        delete extract->pointer;
+        Heap_node* tmp = chld;
+        while(tmp != nullptr) {
+            tmp->parent = nullptr;
+            tmp = tmp->sibling;
+        }
+        chld = reverse_list(chld);
+        merge(chld);
+    }
     Heap_node* merge_nodes(Heap_node* first, Heap_node* second) {
+        if(first == nullptr) {
+            return second;
+        }
+        if(second == nullptr) {
+            return first;
+        }
         if(first->key < second->key) {
             first->degree *= 2;
             first->sibling = second->sibling;
             second->sibling = first->child;
             first->child = second;
+            second->parent = first;
+            second->prev = nullptr;
             return first;
         } else {
             second->degree *= 2;
             first->sibling = second->child;
             second->child = first;
+            first->parent = second;
+            second->prev = first->prev;
+            first->prev = nullptr;
             return second;
         }
     }
@@ -121,6 +319,7 @@ public:
                     heap1 = heap1->sibling;
                 } else {
                     nw_heap->sibling = heap1;
+                    heap1->prev = nw_heap;
                     heap1 = heap1->sibling;
                     nw_heap = nw_heap->sibling;
                 }
@@ -131,6 +330,7 @@ public:
                     heap2 = heap2->sibling;
                 } else {
                     nw_heap->sibling = heap2;
+                    heap2->prev = nw_heap;
                     heap2 = heap2->sibling;
                     nw_heap = nw_heap->sibling;
                 }
@@ -142,6 +342,7 @@ public:
                 nw_root = nw_heap;
             } else {
                 nw_heap->sibling = heap2;
+                heap2->prev = nw_heap;
             }
         } else {
             if(nw_heap == nullptr) {
@@ -149,6 +350,7 @@ public:
                 nw_root = nw_heap;
             } else {
                 nw_heap->sibling = heap1;
+                heap1->prev = nw_heap;
             }
         }
         nw_heap = nw_root;
@@ -163,6 +365,7 @@ public:
                         nw_root = nw_heap;
                     } else {
                         nw_heap = merge_nodes(nw_heap, nw_heap->sibling);
+                        nw_heap->prev->sibling = nw_heap;
                     }
                 }
             } else {
@@ -171,8 +374,6 @@ public:
         }
         root = nw_root;
         update_min(root);
-       /* print(root);
-        std::cout << " @#$% \n";*/
     }
 
     T extract_min() {
@@ -184,15 +385,27 @@ public:
         T return_value = minimum->key;
         if(root == minimum) {
             root = root->sibling;
+            if(root != nullptr) {
+                root->prev = nullptr;
+            }
         }
         while(change->sibling != nullptr) {
             if(change->sibling == minimum) {
                 change->sibling = minimum->sibling;
+                if(minimum->sibling != nullptr) {
+                    minimum->sibling->prev = change;
+                }
                 break;
             }
             change = change->sibling;
         }
         delete minimum;
+        delete minimum->pointer;
+        Heap_node* tmp = node;
+        while(tmp != nullptr) {
+            tmp->parent = nullptr;
+            tmp = tmp->sibling;
+        }
         node = reverse_list(node);
         merge(node);
         return return_value;
@@ -207,6 +420,7 @@ public:
         }
         Heap_node* nw_start = reverse_list(start->sibling);
         tmp->sibling = start;
+        start->prev = tmp;
         start->sibling = nullptr;
         return nw_start;
     }
