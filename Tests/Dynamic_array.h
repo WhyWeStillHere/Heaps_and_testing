@@ -16,6 +16,16 @@ public:
         max_size = 1;
         array = new T[1];
     }
+
+    Dynamic_array(int n, T key) {
+        size_ = 0;
+        max_size = 1;
+        array = new T[1];
+        while(size_ != n) {
+            push_back(key);
+        }
+    }
+
     ~Dynamic_array() {
         delete[] array;
     }

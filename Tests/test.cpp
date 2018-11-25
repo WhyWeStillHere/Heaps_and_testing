@@ -8,6 +8,7 @@
 #include "Dynamic_array.h"
 #include "Heap.h"
 #include "Binomial_heap.h"
+#include "Fibonacci_heap.h"
 
 using testing::Eq;
 
@@ -304,7 +305,7 @@ TEST(Binomial_heap_tests, extract_test) {
     a.insert(-1);
     EXPECT_EQ(-1, a.get_min());
 }
-TEST(Binomial_heap_tests, delete_test) {
+/*TEST(Binomial_heap_tests, delete_test) {
     Binomial_heap<int> a;
     Binomial_heap<int>::Pointer* p, *p1, *p2, *p3;
     p1 = a.insert(5);
@@ -368,5 +369,119 @@ TEST(Binomial_heap_tests, change_test) {
     a.extract_min();
     EXPECT_EQ(a.get_min(), 9);
     a.print(a.get_root());
+    EXPECT_EQ(a.is_empty(), 1);
+}*/
+
+TEST(Fibonacci_heap_tests, insert_test) {
+    Fibonacci_heap<int> kek;
+    int minim;
+    kek.insert(0);
+    minim = 0;
+    for(int i = 0; i <  100000; i++) {
+        EXPECT_EQ(kek.get_min(), minim);
+        int t = rand();
+        kek.insert(t);
+        minim = std::min(t, minim);
+    }
+}
+TEST(Fibonacci_heap_tests, extract_test) {
+    Fibonacci_heap<int> a;
+    a.insert(5);
+    a.insert(7);
+    a.insert(9);
+    a.insert(-2);
+    a.insert(-5);
+    a.insert(100);
+    EXPECT_EQ(a.get_min(), -5);
+    a.extract_min();
+    EXPECT_EQ(a.get_min(), -2);
+    a.extract_min();
+    EXPECT_EQ(a.get_min(), 5);
+    a.extract_min();
+    EXPECT_EQ(a.get_min(), 7);
+    a.extract_min();
+    EXPECT_EQ(a.get_min(), 9);
+    a.extract_min();
+    EXPECT_EQ(a.get_min(), 100);
+    a.extract_min();
+    EXPECT_THROW(a.get_min(), std::out_of_range);
+    EXPECT_THROW(a.extract_min(), std::out_of_range);
+
+    a.insert(2);
+    a.insert(1);
+    a.insert(4);
+    a.insert(5);
+    a.insert(-1);
+    int tmp = a.extract_min();
+    EXPECT_EQ(tmp, -1);
+    EXPECT_EQ(1, a.get_min());
+    tmp = a.extract_min();
+    EXPECT_EQ(tmp, 1);
+    EXPECT_EQ(2, a.get_min());
+    a.extract_min();
+    EXPECT_EQ(4, a.get_min());
+    a.extract_min();
+    EXPECT_EQ(5, a.get_min());
+    a.extract_min();
+    EXPECT_THROW(a.extract_min(), std::out_of_range);
+    EXPECT_THROW(a.get_min(), std::out_of_range);
+    a.insert(2);
+    a.insert(2);
+    a.extract_min();
+    EXPECT_EQ(2, a.get_min());
+    a.insert(1);
+    EXPECT_EQ(1, a.get_min());
+    a.insert(4);
+    EXPECT_EQ(1, a.get_min());
+    a.insert(5);
+    EXPECT_EQ(1, a.get_min());
+    a.insert(-1);
+    EXPECT_EQ(-1, a.get_min());
+}
+
+TEST(Fibonacci_heap_tests, decrease_test) {
+    Fibonacci_heap<int> a;
+    Fibonacci_heap<int>::Pointer *p1, *p2, *p3, *p4;
+    p1 = a.insert(-5);
+    p2 = a.insert(100);
+    p3 = a.insert(8);
+    a.insert(-2);
+    p4 = a.insert(50);
+    a.insert(0);
+    EXPECT_EQ(-5, a.get_min());
+    a.decrease_key(p3, -10);
+    EXPECT_EQ(-10, a.get_min());
+    EXPECT_EQ(a.size(), 6);
+    a.extract_min();
+    EXPECT_EQ(-5, a.get_min());
+    EXPECT_EQ(a.size(), 5);
+    a.decrease_key(p4, 25);
+    EXPECT_EQ(-5, a.get_min());
+    EXPECT_EQ(a.size(), 5);
+    a.decrease_key(p4, 20);
+    EXPECT_EQ(-5, a.get_min());
+    EXPECT_EQ(a.size(), 5);
+    a.decrease_key(p2, -6);
+    EXPECT_EQ(-6, a.get_min());
+    EXPECT_EQ(a.size(), 5);
+    a.decrease_key(p2, -7);
+    EXPECT_EQ(-7, a.get_min());
+    EXPECT_EQ(a.size(), 5);
+    a.extract_min();
+    EXPECT_EQ(-5, a.get_min());
+    EXPECT_EQ(a.size(), 4);
+    a.extract_min();
+    EXPECT_EQ(-2, a.get_min());
+    EXPECT_EQ(a.size(), 3);
+    a.extract_min();
+    EXPECT_EQ(0, a.get_min());
+    EXPECT_EQ(a.size(), 2);
+    a.extract_min();
+    EXPECT_EQ(20, a.get_min());
+    EXPECT_EQ(a.size(), 1);
+    a.extract_min();
+    EXPECT_EQ(a.size(), 0);
+    EXPECT_THROW(a.extract_min(), std::out_of_range);
+    EXPECT_THROW(a.get_min(), std::out_of_range);
     EXPECT_EQ(a.is_empty(), 1);
 }
