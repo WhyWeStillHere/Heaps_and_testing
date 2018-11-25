@@ -43,6 +43,8 @@ public:
         while(root != nullptr) {
             Heap_node *nxt = root->sibling;
             delete_binomial_heap(root->child);
+            delete root->pointer;
+            delete root;
             root = nxt;
         }
     }

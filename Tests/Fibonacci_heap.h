@@ -5,7 +5,6 @@
 #ifndef HEAPS_AND_TESTING_FIBONACCI_HEAP_H
 #define HEAPS_AND_TESTING_FIBONACCI_HEAP_H
 #include "Dynamic_array.h"
-#include <queue>
 
 
 template <typename T>
@@ -43,6 +42,43 @@ public:
     };
 
     Fibonacci_heap() {};
+
+    ~Fibonacci_heap() {
+        if(root == nullptr) {
+            return;
+        }
+        Heap_node* start_node = root;
+        root = root->right;
+        while(root != start_node) {
+            Heap_node *next_node = root->right;
+            delete_fibonacci_heap(root->child);
+            delete root->pointer;
+            delete root;
+            root = next_node;
+        }
+        delete_fibonacci_heap(root->child);
+        delete root->pointer;
+        delete root;
+        return;
+    }
+    void delete_fibonacci_heap(Heap_node* root_) {
+        if(root_ == nullptr) {
+            return;
+        }
+        Heap_node* start_node = root_;
+        root_ = root_->right;
+        while(root_ != start_node) {
+            Heap_node* next_node = root_->right;
+            delete_fibonacci_heap(root_->child);
+            delete root_->pointer;
+            delete root_;
+            root_ = next_node;
+        }
+        delete_fibonacci_heap(root_->child);
+        delete root_->pointer;
+        delete root_;
+        return;
+    }
 
     Pointer* insert(T key) {
         Heap_node* new_element = new Heap_node(key);
