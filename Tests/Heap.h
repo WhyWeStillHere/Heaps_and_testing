@@ -11,12 +11,48 @@ template <typename T>
 class Heap {
 public:
     Heap() {};
+    template<class Iterator>
+    Heap(Iterator begin, Iterator end, const int number_of_children): number_of_children_(number_of_children) {
+        if(number_of_children <= 0) {
+            throw std::logic_error("Number of children in heap is less then 1");
+        }
+        Iterator current_iterator = begin;
+        while(current_iterator != end) {
+            heap_storage.push_back(*current_iterator);
+            Pointer* nw = new Pointer(heap_storage.size() - 1);
+            rev_pointers_storage.push_back(nw);
+        }
+        build_heap();
+    }
+    template<class Iterator>
+    Heap(Iterator begin, Iterator end): number_of_children_(2){
+        while(begin != end) {
+            heap_storage.push_back(*begin);
+            Pointer* nw = new Pointer(heap_storage.size() - 1);
+            rev_pointers_storage.push_back(nw);
+            ++begin;
+        }
+        build_heap();
+    }
+    void build_heap() {
+        for(int i = heap_storage.size() / number_of_children_; i >= 0; i--) {
+            sift_down(i);
+        }
+        if(!is_empty()) {
+            minimum = heap_storage[0];
+        }
+    }
+
     Heap(const int number_of_children): number_of_children_(number_of_children) {
         if(number_of_children <= 0) {
             throw std::logic_error("Number of children in heap is less then 1");
         }
     };
-
+    ~Heap() {
+        for(int i = 0; i < rev_pointers_storage.size(); i++) {
+            delete rev_pointers_storage[i];
+        }
+    }
     class Pointer  {
     public:
         int get_index() {
@@ -31,6 +67,13 @@ public:
     private:
         int ind;
     };
+
+    void optimize(int insert_count, int extract_count) {
+        if(!is_empty()) {
+            throw std::logic_error("Heap is not empty");
+        }
+        number_of_children_ = std::max(2, insert_count / extract_count);
+    }
 
     void pointer_check(Pointer* p) {
         if(p == nullptr) {
@@ -77,6 +120,9 @@ public:
         return;
     }
     Pointer* insert(T key) {
+        if(is_empty() || minimum > key) {
+            minimum = key;
+        }
         heap_storage.push_back(key);
         Pointer* nw = new Pointer(heap_storage.size() - 1);
         rev_pointers_storage.push_back(nw);
@@ -87,7 +133,7 @@ public:
         if(is_empty()) {
             throw std::out_of_range("Heap is empty");
         }
-        return heap_storage[0];
+        return minimum;
     }
     T extract_min() {
         if(is_empty()) {
@@ -99,6 +145,9 @@ public:
         delete rev_pointers_storage[rev_pointers_storage.size() - 1];
         rev_pointers_storage.pop_back();
         sift_down(0);
+        if(!is_empty()) {
+            minimum = heap_storage[0];
+        }
         return tmp;
     }
     bool is_empty() {
@@ -109,7 +158,7 @@ public:
         }
     }
 
-    void change(Pointer* p, int val) {
+    void change(Pointer* p, T val) {
         pointer_check(p);
         int pos = p->get_index();
         heap_storage[pos] = val;
@@ -118,6 +167,7 @@ public:
         } else {
             sift_down(pos);
         }
+        minimum = heap_storage[0];
         return;
     }
     void delete_element(Pointer* p) {
@@ -132,6 +182,9 @@ public:
         delete rev_pointers_storage[rev_pointers_storage.size() - 1];
         rev_pointers_storage.pop_back();
         sift_down(pos);
+        if(!is_empty()) {
+            minimum = heap_storage[0];
+        }
         return;
     }
     void print() {
@@ -144,7 +197,8 @@ public:
 private:
     Dynamic_array<T> heap_storage;
     Dynamic_array<Pointer*> rev_pointers_storage;
-    const int number_of_children_ = 2;
+    int number_of_children_ = 2;
+    T minimum;
 };
 
 #endif //HEAPS_AND_TESTING_HEAP_H

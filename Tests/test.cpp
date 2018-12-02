@@ -167,6 +167,43 @@ TEST(Heap_tests, extract_test_3kheap) {
     EXPECT_EQ(-1, a.get_min());
 }
 
+TEST(Heap_tests, building_heap) {
+    Dynamic_array<int> inp;
+    inp.push_back(2);
+    inp.push_back(1);
+    inp.push_back(5);
+    inp.push_back(5);
+    inp.push_back(-1);
+    inp.push_back(7);
+    inp.push_back(-2);
+    inp.push_back(5);
+    inp.push_back(12);
+    inp.push_back(-10);
+    Heap<int> a(inp.begin(), inp.end());
+    int tmp = a.extract_min();
+    EXPECT_EQ(tmp, -10);
+    EXPECT_EQ(-2, a.get_min());
+    tmp = a.extract_min();
+    EXPECT_EQ(tmp, -2);
+    a.extract_min();
+    EXPECT_EQ(1, a.get_min());
+    a.extract_min();
+    EXPECT_EQ(2, a.get_min());
+    a.extract_min();
+    a.insert(2);
+    a.insert(2);
+    a.extract_min();
+    EXPECT_EQ(2, a.get_min());
+    a.insert(1);
+    EXPECT_EQ(1, a.get_min());
+    a.insert(4);
+    EXPECT_EQ(1, a.get_min());
+    a.insert(5);
+    EXPECT_EQ(1, a.get_min());
+    a.insert(-1);
+    EXPECT_EQ(-1, a.get_min());
+}
+
 TEST(Heap_pointers_tests, validation_test) {
     Heap<int> a;
     Heap<int>::Pointer* pointer = a.insert(5);
