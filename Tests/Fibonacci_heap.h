@@ -20,7 +20,7 @@ public:
         Heap_node* left = nullptr;
         Heap_node* parent = nullptr;
         Pointer* pointer;
-        bool mark = 0;
+        bool mark = false;
         Heap_node(T key_): key(key_), degree(0) {};
         Heap_node() {};
     };
