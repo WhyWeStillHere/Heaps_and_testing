@@ -16,11 +16,11 @@ public:
         if(number_of_children <= 0) {
             throw std::logic_error("Number of children in heap is less then 1");
         }
-        Iterator current_iterator = begin;
-        while(current_iterator != end) {
-            heap_storage.push_back(*current_iterator);
+        while(begin != end) {
+            heap_storage.push_back(*begin);
             Pointer* nw = new Pointer(heap_storage.size() - 1);
             rev_pointers_storage.push_back(nw);
+            ++begin;
         }
         build_heap();
     }
@@ -68,14 +68,14 @@ public:
         int ind;
     };
 
-    void optimize(int insert_count, int extract_count) {
+    void optimize(int insert_count, int extract_count) { // Optimize work of heap
         if(!is_empty()) {
             throw std::logic_error("Heap is not empty");
         }
         number_of_children_ = std::max(2, insert_count / extract_count);
     }
 
-    void pointer_check(Pointer* p) {
+    void pointer_check(Pointer* p) { // Checks pointer validity
         if(p == nullptr) {
             throw std::logic_error("Invalid pointer");
         }
@@ -88,7 +88,7 @@ public:
         pointer_check(p);
         return heap_storage[p->get_index()];
     }
-    void swap_with_pointers(int first, int second) {
+    void swap_with_pointers(int first, int second) { // Swap elements with valid pointers
         std::swap(heap_storage[first], heap_storage[second]);
         std::swap(rev_pointers_storage[first], rev_pointers_storage[second]);
         rev_pointers_storage[first]->set_index(first);

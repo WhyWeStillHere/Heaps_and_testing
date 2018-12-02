@@ -57,11 +57,6 @@ public:
         Dynamic_array<T>* get_array() {
             return array;
         }
-        Iterator operator=(Iterator second) {
-            index = second.get_index();
-            array = second.get_array();
-            return this;
-        }
         Iterator(int index_, Dynamic_array<T>* array_): index(index_), array(array_) {};
         Iterator(Iterator* iterator) {
             if(iterator == nullptr) {

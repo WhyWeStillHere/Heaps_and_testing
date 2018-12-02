@@ -6,7 +6,6 @@
 #define HEAPS_AND_TESTING_BINOMIAL_HEAP_H
 
 #include "Dynamic_array.h"
-#include <queue>
 
 
 template <typename T>
@@ -62,7 +61,7 @@ public:
         }
         return minimum->key;
     }
-    void update_min(Heap_node* node) {
+    void update_min(Heap_node* node) { // Update current minimum
         minimum = nullptr;
         while(node != nullptr) {
             if(minimum == nullptr) {
@@ -87,7 +86,7 @@ public:
         return p;
     }
 
-    Heap_node* merge_nodes(Heap_node* first, Heap_node* second) {
+    Heap_node* merge_nodes(Heap_node* first, Heap_node* second) { // Merge two heap's nodes
         if(first->key < second->key) {
             first->degree *= 2;
             first->sibling = second->sibling;
@@ -213,7 +212,7 @@ public:
         return nw_start;
     }
 
-    void print(Heap_node* root_) {
+    /*void print(Heap_node* root_) {
         Heap_node* cur = root_;
         while(cur != nullptr) {
             std::cout << "!! ";
@@ -240,7 +239,7 @@ public:
             }
         }
         std::cout << "\n";
-    }
+    }*/
 
 private:
     Heap_node* root = nullptr;

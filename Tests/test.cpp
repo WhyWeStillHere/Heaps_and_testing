@@ -342,72 +342,6 @@ TEST(Binomial_heap_tests, extract_test) {
     a.insert(-1);
     EXPECT_EQ(-1, a.get_min());
 }
-/*TEST(Binomial_heap_tests, delete_test) {
-    Binomial_heap<int> a;
-    Binomial_heap<int>::Pointer* p, *p1, *p2, *p3;
-    p1 = a.insert(5);
-    p2 = a.insert(7);
-    a.insert(9);
-    p = a.insert(-2);
-    a.insert(-5);
-    p3 = a.insert(100);
-    EXPECT_EQ(a.get_min(), -5);
-    a.delete_node(p);
-    EXPECT_EQ(a.get_min(), -5);
-    a.delete_node(p2);
-    EXPECT_EQ(a.get_min(), -5);
-    a.extract_min();
-    EXPECT_EQ(a.get_min(), 5);
-    a.delete_node(p1);
-    EXPECT_EQ(a.get_min(), 9);
-    a.delete_node(p3);
-    EXPECT_EQ(a.get_min(), 9);
-    a.extract_min();
-    EXPECT_EQ(a.is_empty(), 1);
-}
-TEST(Binomial_heap_tests, change_test) {
-    Binomial_heap<int> a;
-    Binomial_heap<int>::Pointer* p, *p1, *p2, *p3;
-    p1 = a.insert(5);
-    p2 = a.insert(7);
-    a.insert(9);
-    p = a.insert(-2);
-    a.insert(-5);
-    p3 = a.insert(100);
-    a.print(a.get_root());
-    EXPECT_EQ(a.get_min(), -5);
-    a.change_node(p, 102);
-    EXPECT_EQ(a.get_min(), -5);
-    a.print(a.get_root());
-    a.change_node(p, -8);
-    EXPECT_EQ(a.get_min(), -8);
-    a.print(a.get_root());
-    a.extract_min();
-    EXPECT_EQ(a.get_min(), -5);
-    a.print(a.get_root());
-    a.change_node(p1, -8);
-    EXPECT_EQ(a.get_min(), -8);
-    a.print(a.get_root());
-    a.change_node(p3, 150);
-    EXPECT_EQ(a.get_min(), -8);
-    a.print(a.get_root());
-    a.extract_min();
-    EXPECT_EQ(a.get_min(), -5);
-    a.print(a.get_root());
-    a.change_node(p3, -100);
-    EXPECT_EQ(a.get_min(), -100);
-    a.print(a.get_root());
-    a.extract_min();
-    EXPECT_EQ(a.get_min(), -5);
-    a.print(a.get_root());
-    a.change_node(p2, -5);
-    EXPECT_EQ(a.get_min(), -5);
-    a.print(a.get_root());
-    a.extract_min();
-    EXPECT_EQ(a.get_min(), 9);
-    a.print(a.get_root());
-    EXPECT_EQ(a.is_empty(), 1);
-}*/
 
 TEST(Fibonacci_heap_tests, insert_test) {
     Fibonacci_heap<int> kek;
@@ -521,4 +455,70 @@ TEST(Fibonacci_heap_tests, decrease_test) {
     EXPECT_THROW(a.extract_min(), std::out_of_range);
     EXPECT_THROW(a.get_min(), std::out_of_range);
     EXPECT_EQ(a.is_empty(), 1);
+}
+
+TEST(Additional_tests, test_simple_heap) {
+    Dynamic_array<long long> arr;
+    for(int i = 0; i < 20; i++) {
+        arr.push_back(i);
+    }
+    Heap<long long> a(arr.begin(), arr.end(), 4);
+    EXPECT_EQ(0, a.get_min());
+    a.extract_min();
+    EXPECT_EQ(1, a.get_min());
+    Heap<long long>::Pointer *p;
+    p = a.insert(-5);
+    EXPECT_EQ(-5, a.get_min());
+    a.change(p, 25);
+    for(int i = 0; i < 19; i++) {
+        EXPECT_EQ(i + 1, a.get_min());
+        a.extract_min();
+    }
+    EXPECT_EQ(25, a.get_min());
+    a.delete_element(p);
+    EXPECT_EQ(1, a.is_empty());
+}
+
+TEST(Additional_tests, test_binominal_heap) {
+    Binomial_heap<long long> a;
+    for(int i = 0; i < 20; i++) {
+        a.insert(i);
+    }
+    EXPECT_EQ(0, a.get_min());
+    a.extract_min();
+    EXPECT_EQ(1, a.get_min());
+    a.insert(25);
+    for(int i = 0; i < 19; i++) {
+        EXPECT_EQ(i + 1, a.get_min());
+        a.extract_min();
+    }
+    EXPECT_EQ(25, a.get_min());
+    a.extract_min();
+    EXPECT_EQ(1, a.is_empty());
+}
+
+TEST(Additional_tests, test_fibonacci_heap) {
+    Heap<int> a;
+    Heap<int>::Pointer* pointer = a.insert(5);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.insert(-1);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.insert(2);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.insert(-3);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.insert(-5);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.insert(6);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.extract_min();
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.extract_min();
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.extract_min();
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.extract_min();
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.extract_min();
+    EXPECT_EQ(6, a.get_min());
 }

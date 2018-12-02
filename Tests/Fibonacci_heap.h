@@ -16,7 +16,6 @@ public:
         T key;
         int degree = 0;
         Heap_node* child = nullptr;
-        Heap_node* sibling = nullptr;
         Heap_node* right = nullptr;
         Heap_node* left = nullptr;
         Heap_node* parent = nullptr;
@@ -101,14 +100,14 @@ public:
         size_++;
         return new_elem_pointer;
     }
-    bool is_empty() const {
+    bool is_empty() {
         if(size_ == 0) {
             return 1;
         } else {
             return 0;
         }
     }
-    T get_min() const {
+    T get_min() {
         if(root == nullptr) {
             throw std::out_of_range("Fibonacci heap is empty");
         }
@@ -182,7 +181,7 @@ public:
         return return_value;
     }
 
-    void consolidate() {
+    void consolidate() { // Optimize Fibonacci heap structure
         Dynamic_array<Heap_node*> nodes_array(root->degree + 1, nullptr);
         nodes_array[root->degree] = root;
         Heap_node* current_node = root->right;
