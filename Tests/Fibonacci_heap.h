@@ -60,24 +60,6 @@ public:
         delete root;
         return;
     }
-    void delete_fibonacci_heap(Heap_node* root_) {
-        if(root_ == nullptr) {
-            return;
-        }
-        Heap_node* start_node = root_;
-        root_ = root_->right;
-        while(root_ != start_node) {
-            Heap_node* next_node = root_->right;
-            delete_fibonacci_heap(root_->child);
-            delete root_->pointer;
-            delete root_;
-            root_ = next_node;
-        }
-        delete_fibonacci_heap(root_->child);
-        delete root_->pointer;
-        delete root_;
-        return;
-    }
 
     Pointer* insert(T key) {
         Heap_node* new_element = new Heap_node(key);
@@ -112,22 +94,6 @@ public:
             throw std::out_of_range("Fibonacci heap is empty");
         }
         return root->key;
-    }
-
-    Heap_node* union_lists(Heap_node* first, Heap_node* second) {
-        if(second == nullptr) {
-            return first;
-        }
-        if(first == nullptr) {
-            return second;
-        }
-        Heap_node* first_right = first->right;
-        Heap_node* second_left = second->left;
-        first->right = second;
-        second->left = first;
-        second_left->right = first_right;
-        first_right->left = second_left;
-        return first;
     }
 
     void merge(Fibonacci_heap* heap) {
@@ -181,6 +147,100 @@ public:
         return return_value;
     }
 
+    void decrease_key(Pointer* heap_node_pointer, T new_key) {
+        if(heap_node_pointer == nullptr) {
+            throw std::logic_error("Invalid pointer");
+        }
+        Heap_node* current_node = heap_node_pointer->get_elem();
+        if(current_node->parent == nullptr || current_node->parent->key < new_key) {
+            current_node->key = new_key;
+            if(current_node->parent == nullptr && root->key > new_key) {
+                root = current_node;
+            }
+            return;
+        }
+        Heap_node* node_parent = current_node->parent;
+        current_node->key = new_key;
+        cut(current_node);
+        cascading_cut(node_parent);
+    }
+
+    void print_roots() {
+        if(root == nullptr) {
+            return;
+        }
+        Heap_node* move = root->right;
+        std::cout << root->key << " ";
+        while(move != root) {
+            std::cout << move->key << " ";
+            move = move->right;
+        }
+        std::cout << "\n";
+    }
+    int size() {
+        return size_;
+    }
+
+
+private:
+    Heap_node* root = nullptr;
+    int size_ = 0;
+    void delete_fibonacci_heap(Heap_node* root_) {
+        if(root_ == nullptr) {
+            return;
+        }
+        Heap_node* start_node = root_;
+        root_ = root_->right;
+        while(root_ != start_node) {
+            Heap_node* next_node = root_->right;
+            delete_fibonacci_heap(root_->child);
+            delete root_->pointer;
+            delete root_;
+            root_ = next_node;
+        }
+        delete_fibonacci_heap(root_->child);
+        delete root_->pointer;
+        delete root_;
+        return;
+    }
+    void cascading_cut(Heap_node* current_node) {
+        while(current_node != nullptr && current_node->mark == true) {
+            Heap_node* node_parent = current_node->parent;
+            cut(current_node);
+            current_node = node_parent;
+        }
+        if(current_node != nullptr) {
+            current_node->mark = false;
+        }
+        return;
+    }
+    void cut(Heap_node* current_node) {
+        Heap_node* node_left = current_node->left;
+        Heap_node* node_right = current_node->right;
+        Heap_node* node_parent = current_node->parent;
+        node_right->left = node_left;
+        node_left->right = node_right;
+        current_node->left = current_node;
+        current_node->right = current_node;
+        if(node_parent != nullptr) {
+            --node_parent->degree;
+            node_parent->mark = 1;
+        }
+        if(node_parent != nullptr && node_parent->child == current_node) {
+            if(node_left == current_node) {
+                node_parent->child = nullptr;
+            } else {
+                node_parent->child = node_right;
+            }
+        }
+        current_node->parent = nullptr;
+        current_node->mark = 0;
+        root = union_lists(root, current_node);
+        if(root != current_node && root->key > current_node->key) {
+            root = current_node;
+        }
+        return;
+    }
     void consolidate() { // Optimize Fibonacci heap structure
         Dynamic_array<Heap_node*> nodes_array(root->degree + 1, nullptr);
         nodes_array[root->degree] = root;
@@ -216,82 +276,21 @@ public:
             }
         }
     }
-
-    void decrease_key(Pointer* heap_node_pointer, T new_key) {
-        Heap_node* current_node = heap_node_pointer->get_elem();
-        if(current_node->parent == nullptr || current_node->parent->key < new_key) {
-            current_node->key = new_key;
-            if(current_node->parent == nullptr && root->key > new_key) {
-                root = current_node;
-            }
-            return;
+    Heap_node* union_lists(Heap_node* first, Heap_node* second) {
+        if(second == nullptr) {
+            return first;
         }
-        Heap_node* node_parent = current_node->parent;
-        current_node->key = new_key;
-        cut(current_node);
-        cascading_cut(node_parent);
+        if(first == nullptr) {
+            return second;
+        }
+        Heap_node* first_right = first->right;
+        Heap_node* second_left = second->left;
+        first->right = second;
+        second->left = first;
+        second_left->right = first_right;
+        first_right->left = second_left;
+        return first;
     }
-
-    void cut(Heap_node* current_node) {
-        Heap_node* node_left = current_node->left;
-        Heap_node* node_right = current_node->right;
-        Heap_node* node_parent = current_node->parent;
-        node_right->left = node_left;
-        node_left->right = node_right;
-        current_node->left = current_node;
-        current_node->right = current_node;
-        if(node_parent != nullptr) {
-            --node_parent->degree;
-            node_parent->mark = 1;
-        }
-        if(node_parent != nullptr && node_parent->child == current_node) {
-            if(node_left == current_node) {
-                node_parent->child = nullptr;
-            } else {
-                node_parent->child = node_right;
-            }
-        }
-        current_node->parent = nullptr;
-        current_node->mark = 0;
-        root = union_lists(root, current_node);
-        if(root != current_node && root->key > current_node->key) {
-            root = current_node;
-        }
-        return;
-    }
-
-    void print_roots() {
-        if(root == nullptr) {
-            return;
-        }
-        Heap_node* move = root->right;
-        std::cout << root->key << " ";
-        while(move != root) {
-            std::cout << move->key << " ";
-            move = move->right;
-        }
-        std::cout << "\n";
-    }
-
-    void cascading_cut(Heap_node* current_node) {
-        while(current_node != nullptr && current_node->mark == true) {
-            Heap_node* node_parent = current_node->parent;
-            cut(current_node);
-            current_node = node_parent;
-        }
-        if(current_node != nullptr) {
-            current_node->mark = false;
-        }
-        return;
-    }
-
-    int size() {
-        return size_;
-    }
-
-private:
-    Heap_node* root = nullptr;
-    int size_ = 0;
 };
 
 #endif //HEAPS_AND_TESTING_FIBONACCI_HEAP_H

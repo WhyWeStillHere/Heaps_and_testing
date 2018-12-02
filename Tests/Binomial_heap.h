@@ -26,6 +26,9 @@ public:
     class Pointer {
     public:
         T get_elem() {
+            if(elem == nullptr) {
+                throw std::logic_error("Invalid pointer");
+            }
             return elem->key;
         }
         void set_index(Heap_node* x) {
@@ -35,7 +38,7 @@ public:
         Pointer(){};
         Pointer(Heap_node* x): elem(x) {};
     private:
-        Heap_node* elem;
+        Heap_node* elem = nullptr;
     };
 
     ~Binomial_heap() {
@@ -61,19 +64,6 @@ public:
         }
         return minimum->key;
     }
-    void update_min(Heap_node* node) { // Update current minimum
-        minimum = nullptr;
-        while(node != nullptr) {
-            if(minimum == nullptr) {
-                minimum = node;
-            }
-            if(node->key < minimum->key) {
-                minimum = node;
-            }
-            node = node->sibling;
-        }
-        return;
-    }
 
     Heap_node* get_root() {
         return root;
@@ -86,20 +76,6 @@ public:
         return p;
     }
 
-    Heap_node* merge_nodes(Heap_node* first, Heap_node* second) { // Merge two heap's nodes
-        if(first->key < second->key) {
-            first->degree *= 2;
-            first->sibling = second->sibling;
-            second->sibling = first->child;
-            first->child = second;
-            return first;
-        } else {
-            second->degree *= 2;
-            first->sibling = second->child;
-            second->child = first;
-            return second;
-        }
-    }
     void merge(Heap_node* heap2) {
         if(root == nullptr) {
             root = heap2;
@@ -172,8 +148,6 @@ public:
         }
         root = nw_root;
         update_min(root);
-        /* print(root);
-         std::cout << " @#$% \n";*/
     }
 
     T extract_min() {
@@ -198,19 +172,7 @@ public:
         merge(node);
         return return_value;
     }
-    Heap_node* reverse_list(Heap_node* start) {
-        if(start == nullptr) {
-            return nullptr;
-        }
-        Heap_node* tmp = start->sibling;
-        if(tmp == nullptr) {
-            return start;
-        }
-        Heap_node* nw_start = reverse_list(start->sibling);
-        tmp->sibling = start;
-        start->sibling = nullptr;
-        return nw_start;
-    }
+
 
     /*void print(Heap_node* root_) {
         Heap_node* cur = root_;
@@ -251,6 +213,46 @@ private:
             delete root_->pointer;
             delete root_;
             root_ = nxt;
+        }
+        return;
+    }
+    Heap_node* merge_nodes(Heap_node* first, Heap_node* second) { // Merge two heap's nodes
+        if(first->key < second->key) {
+            first->degree *= 2;
+            first->sibling = second->sibling;
+            second->sibling = first->child;
+            first->child = second;
+            return first;
+        } else {
+            second->degree *= 2;
+            first->sibling = second->child;
+            second->child = first;
+            return second;
+        }
+    }
+    Heap_node* reverse_list(Heap_node* start) {
+        if(start == nullptr) {
+            return nullptr;
+        }
+        Heap_node* tmp = start->sibling;
+        if(tmp == nullptr) {
+            return start;
+        }
+        Heap_node* nw_start = reverse_list(start->sibling);
+        tmp->sibling = start;
+        start->sibling = nullptr;
+        return nw_start;
+    }
+    void update_min(Heap_node* node) { // Update current minimum
+        minimum = nullptr;
+        while(node != nullptr) {
+            if(minimum == nullptr) {
+                minimum = node;
+            }
+            if(node->key < minimum->key) {
+                minimum = node;
+            }
+            node = node->sibling;
         }
         return;
     }

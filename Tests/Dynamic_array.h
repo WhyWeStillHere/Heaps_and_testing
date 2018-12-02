@@ -18,7 +18,14 @@ public:
         begin_ = new Iterator(0, this);
         end_ = new Iterator(0, this);
     }
-
+    Dynamic_array(int n, T key) {
+        size_ = 0;
+        max_size = 1;
+        array = new T[1];
+        while(size_ != n) {
+            push_back(key);
+        }
+    }
     class Iterator {
     public:
         T& operator*() {
@@ -70,14 +77,6 @@ public:
         Dynamic_array<T>* array;
     };
 
-    Dynamic_array(int n, T key) {
-        size_ = 0;
-        max_size = 1;
-        array = new T[1];
-        while(size_ != n) {
-            push_back(key);
-        }
-    }
 
     ~Dynamic_array() {
         delete[] array;
@@ -96,26 +95,6 @@ public:
             throw std::out_of_range("Out of range in dynamic array");
         }
         return *(array + ind);
-    }
-    void expand() {
-        T* new_array = new T[max_size * 2];
-        for(int i = 0; i < max_size; i++) {
-            *(new_array + i) = *(array + i);
-        }
-        max_size *= 2;
-        delete[] array;
-        array = new_array;
-        return;
-    }
-    void reduce() {
-        T* new_array = new T[max_size / 2];
-        for(int i = 0; i < size_; i++) {
-            *(new_array + i) = *(array + i);
-        }
-        max_size /= 2;
-        delete[] array;
-        array = new_array;
-        return;
     }
     void push_back(T key) {
         ++(*end_);
@@ -150,6 +129,26 @@ private:
     T* array;
     Iterator* begin_;
     Iterator* end_;
+    void expand() {
+        T* new_array = new T[max_size * 2];
+        for(int i = 0; i < max_size; i++) {
+            *(new_array + i) = *(array + i);
+        }
+        max_size *= 2;
+        delete[] array;
+        array = new_array;
+        return;
+    }
+    void reduce() {
+        T* new_array = new T[max_size / 2];
+        for(int i = 0; i < size_; i++) {
+            *(new_array + i) = *(array + i);
+        }
+        max_size /= 2;
+        delete[] array;
+        array = new_array;
+        return;
+    }
 };
 
 
