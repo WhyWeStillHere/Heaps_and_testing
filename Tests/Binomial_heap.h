@@ -55,6 +55,9 @@ public:
     }
 
     T get_element(Pointer* pointer) {
+        if(pointer == nullptr) {
+            throw std::logic_error("Nullptr pointer");
+        }
         return pointer->get_elem();
     }
     bool is_empty() {

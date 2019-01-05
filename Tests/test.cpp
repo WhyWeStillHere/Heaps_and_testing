@@ -566,6 +566,31 @@ TEST(Fibonacci_heap_tests, extract_test) {
     a.insert(-1);
     EXPECT_EQ(-1, a.get_min());
 }
+TEST(Fibonacci_heap_tests, validation_test) {
+    Fibonacci_heap<int> a;
+    Fibonacci_heap<int>::Pointer* pointer = a.insert(5);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.insert(-1);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.insert(2);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.insert(-3);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.insert(-5);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.insert(6);
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.extract_min();
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.extract_min();
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.extract_min();
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.extract_min();
+    EXPECT_EQ(5, a.get_element(pointer));
+    a.extract_min();
+    EXPECT_EQ(6, a.get_min());
+}
 TEST(Fibonacci_heap_tests, decrease_test) {
     Fibonacci_heap<int> a;
     Fibonacci_heap<int>::Pointer *p1, *p2, *p3, *p4;

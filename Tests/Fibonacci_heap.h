@@ -40,6 +40,13 @@ public:
         Heap_node* elem;
     };
 
+    T get_element(Pointer* pointer) {
+        if(pointer == nullptr || pointer->get_elem() == nullptr) {
+            throw std::logic_error("Nullptr pointer");
+        }
+        return pointer->get_elem()->key;
+    }
+
     Fibonacci_heap() {};
 
     ~Fibonacci_heap() {
