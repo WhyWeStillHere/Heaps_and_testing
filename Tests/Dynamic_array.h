@@ -19,9 +19,14 @@ public:
         end_ = new Iterator(0, this);
     }
     Dynamic_array(int n, T key) {
+        if(n < 0) {
+            std::out_of_range("Invalid size");
+        }
         size_ = 0;
         max_size = 1;
         array = new T[1];
+        begin_ = new Iterator(0, this);
+        end_ = new Iterator(0, this);
         while(size_ != n) {
             push_back(key);
         }

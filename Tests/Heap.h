@@ -68,11 +68,12 @@ public:
         int ind;
     };
 
-    void optimize(int insert_count, int extract_count) { // Optimize work of heap
+    int optimize(int insert_count, int extract_count) { // Optimize work of heap and return new number of children
         if(!is_empty()) {
             throw std::logic_error("Heap is not empty");
         }
         number_of_children_ = std::max(2, insert_count / extract_count);
+        return number_of_children_;
     }
 
     void pointer_check(Pointer* p) { // Checks pointer validity

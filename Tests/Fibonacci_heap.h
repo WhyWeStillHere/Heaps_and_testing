@@ -110,6 +110,8 @@ public:
             }
             size_ += heap->size_;
         }
+        heap->root = nullptr;
+        heap->size_ = 0;
     }
 
     T extract_min() {
@@ -170,9 +172,9 @@ public:
             return;
         }
         Heap_node* move = root->right;
-        std::cout << root->key << " ";
+        std::cout << root->key << " " << root->degree << "\n";
         while(move != root) {
-            std::cout << move->key << " ";
+            std::cout << move->key << " " << move->degree << "\n";
             move = move->right;
         }
         std::cout << "\n";
@@ -241,13 +243,46 @@ private:
         }
         return;
     }
+
+    void swap_in_list(Heap_node* first, Heap_node* second) {
+        if(first == second || first == nullptr || second == nullptr) {
+            return;
+        }
+        Heap_node* first_right = first->right;
+        Heap_node* first_left = first->left;
+        if(second->right == first) {
+            first->right = second;
+        } else {
+            first->right = second->right;
+        }
+        if(second->left == first) {
+            first->left = second;
+        } else {
+            first->left = second->left;
+        }if(first_right == second) {
+            second->right = first;
+        } else {
+            second->right = first_right;
+        }
+        if(first_left == second) {
+            second->left = first;
+        } else {
+            second->left = first_left;
+        }
+        first->right->left = first;
+        first->left->right = first;
+        second->right->left = second;
+        second->left->right = second;
+        return;
+    }
+
     void consolidate() { // Optimize Fibonacci heap structure
         Dynamic_array<Heap_node*> nodes_array(root->degree + 1, nullptr);
         nodes_array[root->degree] = root;
         Heap_node* current_node = root->right;
         while (current_node->degree >= nodes_array.size() || nodes_array[current_node->degree] != current_node) {
             while(current_node->degree >= nodes_array.size()) {
-                nodes_array.push_back(0);
+                nodes_array.push_back(nullptr);
             }
             if(nodes_array[current_node->degree] == nullptr)  {
                 nodes_array[current_node->degree] = current_node;
@@ -262,12 +297,17 @@ private:
                 if(carry->key < current_node->key) {
                     add_to = carry;
                     add = current_node;
+                    swap_in_list(add, add_to);
                 } else {
                     add_to = current_node;
                     add = carry;
                 }
-                add_to->child = union_lists(add_to->child, add);
+                add->left->right = add->right;
+                add->right->left = add->left;
+                add->left = add;
+                add->right = add;
                 add->parent = add_to;
+                add_to->child = union_lists(add_to->child, add);
                 ++add_to->degree;
                 current_node = add_to;
                 if(root->key > current_node->key) {
@@ -287,8 +327,8 @@ private:
         Heap_node* second_left = second->left;
         first->right = second;
         second->left = first;
-        second_left->right = first_right;
         first_right->left = second_left;
+        second_left->right = first_right;
         return first;
     }
 };

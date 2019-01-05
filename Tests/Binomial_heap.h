@@ -7,7 +7,6 @@
 
 #include "Dynamic_array.h"
 
-
 template <typename T>
 class Binomial_heap {
 public:
@@ -18,6 +17,7 @@ public:
         int degree = 0;
         Heap_node* child = nullptr;
         Heap_node* sibling = nullptr;
+        Heap_node* parent = nullptr;
         Pointer* pointer;
         Heap_node(T key_): key(key_), degree(1) {};
         Heap_node() {};
@@ -35,6 +35,9 @@ public:
             elem = x;
             return;
         }
+        Heap_node* get_node() {
+            return elem;
+        }
         Pointer(){};
         Pointer(Heap_node* x): elem(x) {};
     private:
@@ -51,6 +54,9 @@ public:
         }
     }
 
+    T get_element(Pointer* pointer) {
+        return pointer->get_elem();
+    }
     bool is_empty() {
         if(root == nullptr) {
             return 1;
@@ -129,8 +135,9 @@ public:
             }
         }
         nw_heap = nw_root;
+        Heap_node* prev = nullptr;
         while(nw_heap->sibling != nullptr) {
-            if(nw_heap->degree == nw_heap->sibling->degree) {
+            if(nw_heap->degree == nw_heap->sibling->degree && nw_heap == nw_root) {
                 if(nw_heap->sibling->sibling != nullptr &&
                    nw_heap->sibling->degree == nw_heap->sibling->sibling->degree){
                     nw_heap->sibling = merge_nodes(nw_heap->sibling, nw_heap->sibling->sibling);
@@ -138,23 +145,30 @@ public:
                     if(nw_heap == nw_root) {
                         nw_heap = merge_nodes(nw_heap, nw_heap->sibling);
                         nw_root = nw_heap;
+                        prev = nw_heap;
                     } else {
                         nw_heap = merge_nodes(nw_heap, nw_heap->sibling);
+                        prev->sibling = nw_heap;
                     }
                 }
             } else {
+                prev = nw_heap;
                 nw_heap = nw_heap->sibling;
             }
         }
         root = nw_root;
         update_min(root);
     }
-
     T extract_min() {
         if(minimum == nullptr) {
             throw std::out_of_range("Binomial heap is empty");
         }
         Heap_node* node = minimum->child;
+        Heap_node* move = node;
+        while(move != nullptr) {
+            move->parent = nullptr;
+            move = move->sibling;
+        }
         Heap_node* change = root;
         T return_value = minimum->key;
         if(root == minimum) {
@@ -167,12 +181,87 @@ public:
             }
             change = change->sibling;
         }
+        delete minimum->pointer;
         delete minimum;
         node = reverse_list(node);
         merge(node);
         return return_value;
     }
 
+    Heap_node* swap_with_parent(Heap_node* node) {
+        Pointer* node_parent_pointer = node->parent->pointer;
+        node->parent->pointer->set_index(node);
+        node->pointer->set_index(node->parent);
+        node->parent->pointer = node->pointer;
+        node->pointer = node_parent_pointer;
+        T tmp = node->key;
+        node->key = node->parent->key;
+        node->parent->key = tmp;
+        return node->parent;
+    }
+
+    T delete_node(Pointer* pointer) {
+        Heap_node* node = pointer->get_node();
+        while(node->parent != nullptr) {
+            node = swap_with_parent(node);
+        }
+        Heap_node* node_child = node->child;
+        Heap_node* move = node;
+        while(move != nullptr) {
+            move->parent = nullptr;
+            move = move->sibling;
+        }
+        Heap_node* change = root;
+        T return_value = node->key;
+        if(root == node) {
+            root = root->sibling;
+        }
+        while(change->sibling != nullptr) {
+            if(change->sibling == node) {
+                change->sibling = node->sibling;
+                break;
+            }
+            change = change->sibling;
+        }
+        delete node->pointer;
+        delete node;
+        node_child = reverse_list(node_child);
+        merge(node_child);
+        return return_value;
+    }
+
+    void change(Pointer* pointer, T new_value) {
+        Heap_node* node = pointer->get_node();
+        while(node->parent != nullptr) {
+            node = swap_with_parent(node);
+        }
+        Heap_node* node_child = node->child;
+        Heap_node* move = node_child;
+        while(move != nullptr) {
+            move->parent = nullptr;
+            move = move->sibling;
+        }
+        Heap_node* change = root;
+        T return_value = node->key;
+        if(root == node) {
+            root = root->sibling;
+        }
+        while(change->sibling != nullptr) {
+            if(change->sibling == node) {
+                change->sibling = node->sibling;
+                break;
+            }
+            change = change->sibling;
+        }
+        node_child = reverse_list(node_child);
+        merge(node_child);
+        node->key = new_value;
+        node->sibling = nullptr;
+        node->child = nullptr;
+        node->degree = 1;
+        merge(node);
+        return;
+    }
 
     /*void print(Heap_node* root_) {
         Heap_node* cur = root_;
@@ -222,11 +311,13 @@ private:
             first->sibling = second->sibling;
             second->sibling = first->child;
             first->child = second;
+            second->parent = first;
             return first;
         } else {
             second->degree *= 2;
             first->sibling = second->child;
             second->child = first;
+            first->parent = second;
             return second;
         }
     }
